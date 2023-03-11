@@ -15,7 +15,7 @@ import (
 var countSeries []uint64
 
 func logFunc(connect *sql.DB) {
-	rows, err := connect.Query("SELECT COUNT() FROM default.flows")
+	rows, err := connect.Query("SELECT free_space FROM system.disks")
 	if err != nil {
 		klog.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func SetupCloseHandler() {
 }
 
 func main() {
-	connect, err := sql.Open("clickhouse", "tcp://localhost:9000?debug=true&username=clickhouse_operator&password=clickhouse_operator_password")
+	connect, err := sql.Open("clickhouse", "tcp://127.0.0.1:9000?debug=true&username=clickhouse_operator&password=clickhouse_operator_password")
 	if err != nil {
 		klog.Fatal(err)
 	}

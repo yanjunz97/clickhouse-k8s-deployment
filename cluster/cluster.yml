@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: "ConfigMap"
+metadata:
+  name: "bootstrap-mounted-configmap"
+data:
+  create_table.sh: |
+    #!/bin/bash
+    clickhouse client -n <<-EOSQL
+      CREATE TABLE IF NOT EXISTS events_local (
+        time DateTime,
+        event_id  Int32,
+        uuid UUID
+      )
+      ENGINE = ReplicatedMergeTree('/clickhouse/tables/{cluster}/{shard}/{table}', '{replica}')
+      PARTITION BY toYYYYMM(time)
+      ORDER BY (event_id);
+
+      CREATE TABLE IF NOT EXISTS events_main AS events_local
+      ENGINE = Distributed('{cluster}', default, events_local, rand());
+    EOSQL
+---
+apiVersion: "clickhouse.altinity.com/v1"
+kind: "ClickHouseInstallation"
+metadata:
+  name: "bootstrap"
+spec:
+  configuration:
+    clusters:
+      - name: "bootstrap"
+        layout:
+          shardsCount: 2
+          replicasCount: 2
+    zookeeper:
+      nodes:
+      - host: zookeeper.zoons
+  defaults:
+    templates:
+      podTemplate: pod-template
+      dataVolumeClaimTemplate: data-volume-template
+      logVolumeClaimTemplate: log-volume-template
+
+  templates:
+    podTemplates:
+      - name: pod-template
+        spec:
+          containers:
+            - name: clickhouse
+              image: clickhouse/clickhouse-server:22.3
+              volumeMounts:
+                - name: bootstrap-configmap-volume
+                  mountPath: /docker-entrypoint-initdb.d
+          volumes:
+            - name: bootstrap-configmap-volume
+              configMap:
+                name: bootstrap-mounted-configmap
+
+    volumeClaimTemplates:
+      - name: data-volume-template
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+      - name: log-volume-template
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi

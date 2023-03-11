@@ -101,3 +101,6 @@ memory_size=2g, batch_size=32000, batch_frequecy=32s, insert_rate=1000, availibi
 memory_size=2g, batch_size=35200, batch_frequecy=32s, insert_rate=1100, availibility=1.000000, duration=9600
 memory_size=2g, batch_size=38400, batch_frequecy=32s, insert_rate=1200, availibility=0.983333, duration=9600
 memory_size=2g, batch_size=35200, batch_frequecy=32s, insert_rate=1100, availibility=1.000000, duration=9600
+memory_size=1g, batch_size=100, batch_frequecy=1s, insert_rate=100, availibility=1.000000, duration=1
+memory_size=1g, batch_size=100, batch_frequecy=1s, insert_rate=100, availibility=1.000000, duration=1
+memory_size=1g, batch_size=100, batch_frequecy=1s, insert_rate=100, availibility=1.000000, duration=1
